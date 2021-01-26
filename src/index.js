@@ -2,6 +2,7 @@ const speciesURL = "http://localhost:3000/species"
 const usersURL = "http://localhost:3000/users"
 
 getSpecies()
+renderNavBar()
 
 function getSpecies() {
     fetch(speciesURL)
@@ -9,6 +10,46 @@ function getSpecies() {
     .then(species => {
         species.forEach(species => renderSpecies(species))
     })
+}
+
+function getOneUser() {
+    // fetch(usersURL)
+    // .then(res => res.json())
+    // .then(users => )
+}
+
+function postUser() {
+
+}
+
+function patchUser() {
+
+}
+
+function deleteUser() {
+
+}
+
+function getUserSpecies() {
+
+}
+
+function renderNavBar(species) {
+    let divNav = document.querySelector('.navbar')
+
+    let navBar = document.createElement('nav')
+    let allSpecies = document.createElement('h3')
+    let mySpecies = document.createElement('h3')
+    let account = document.createElement('h3')
+
+    allSpecies.textContent = "All Species"
+    mySpecies.textContent = "My Species"
+    account.textContent = "Account"
+
+    navBar.append(allSpecies, mySpecies, account)
+    divNav.appendChild(navBar)
+
+    allSpecies.addEventListener('click', renderSpecies)
 }
 
 function renderSpecies(species) {
@@ -21,6 +62,7 @@ function renderSpecies(species) {
     let h4 = document.createElement('h4')
     let br = document.createElement('br')
 
+    divContainer.id = species.id
     divContainer.className = 'container'
     speciesImg.src = species.image_url
     h2.textContent = species.name
