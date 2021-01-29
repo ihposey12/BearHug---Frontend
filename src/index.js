@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const speciesURL = "http://localhost:3000/species"
 const usersURL = "http://localhost:3000/users"
+const donationURL = "http://localhost:3000/donations"
 
 function getSpecies() {
     fetch(speciesURL)
@@ -30,26 +31,37 @@ function createNewUser(e) {
     .then((user) => {
         document.querySelector('.current-user').id = user.id
         let hideUser = document.querySelector('#login-container').style.visibility = "hidden"
-        
     })
 }
 
-// function patchUser() {
-//     fetch(`${usersURL}/${}`, {
-//         method: 'PATCH',
-//         headers: {
-//             'Content-Type':'application/json'
-//         },
-//         body: JSON.stringify()
-//             // username: user.username.value,
-//             // email: user.email.value,
-//             // description: user.description.value
-//     })
-//     .then(res => res.json())
-//     .then(user => {
-//         handleEditUser(user)
-//     })
-// }
+function createNewDonation() {
+
+}
+
+function patchUser(id, e) {
+    fetch(`${usersURL}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+            username: e.target.username.value,
+            email: e.target.email.value,
+            description: e.target.description.value
+        })
+    })
+    .then(res => res.json())
+    .then(user => {
+        const mainContainer = document.querySelector('.main-account-card') 
+        newNameSpot = mainContainer.querySelector('h1')
+        newNameSpot.textContent = user.username
+        const newEmailSpot = mainContainer.querySelector('h2')
+        newEmailSpot.textContent = user.email
+        const newDescSpot = mainContainer.querySelector('p')
+        newDescSpot.textContent = user.description
+        document.querySelector('.user-edit-div').style.visibility = "hidden"
+    })
+}
 
 function deleteUser(id) {
     fetch(`${usersURL}/${id}`, {
@@ -102,18 +114,15 @@ function renderNavBar() {
 
     let navBar = document.createElement('nav')
     let allSpecies = document.createElement('h3')
-    let mySpecies = document.createElement('h3')
     let account = document.createElement('h3')
 
     allSpecies.textContent = "All Species"
-    mySpecies.textContent = "My Species"
     account.textContent = "Account"
 
-    navBar.append(allSpecies, mySpecies, account)
+    navBar.append(allSpecies, account)
     divNav.appendChild(navBar)
 
     allSpecies.addEventListener('click', handleAllSpecies)
-    // mySpecies.addEventListener('click', () => handleMySpecies)
     account.addEventListener('click', handleUserAccount)
 }
 
@@ -161,6 +170,7 @@ function handleNewUserSubmit(e) {
 
 function handleClick(species) {
     let mainCard = document.querySelector('.main-species-card')
+    mainCard.id = species.id
 
     let mainDivContainer = document.createElement('div')
     let speciesImgMain = document.createElement('img')
@@ -172,6 +182,7 @@ function handleClick(species) {
     let p = document.createElement('p')
     let donateBtn = document.createElement('button')
     let btnInput = document.createElement('input')
+    let donateForm = document.createElement('form')
 
     donateBtn.className = 'donate-btn'
     btnInput.className = 'donate-input'
@@ -190,8 +201,11 @@ function handleClick(species) {
     mainCard.innerHTML = ""
     mainDivContainer.innerHTML = ""
 
-    mainDivContainer.append(speciesImgMain, mainH2, mainH3, mainH4, habitats, population, p, donateBtn, btnInput)
+    donateForm.append(btnInput, donateBtn)
+    mainDivContainer.append(speciesImgMain, mainH2, mainH3, mainH4, habitats, population, p, donateForm)
     mainCard.appendChild(mainDivContainer)
+
+    donateForm.addEventListener('submit', (e) => userSpeciesDonation(e))
 }
 
 function handleAllSpecies() {
@@ -209,6 +223,7 @@ function handleUserAccount() {
     .then(res => res.json())
     .then(user => {
     let userCard = document.querySelector('.main-account-card')
+    userCard.id = user.id
     
     let userDivCard = document.createElement('div')
     let userMessage = document.createElement('h1')
@@ -219,26 +234,27 @@ function handleUserAccount() {
     let dBtn = document.createElement('button')
 
     userMessage.textContent = `Hello, ${user.username}!`
-    userName.textContent = user.username
-    userEmail.textContent = user.email
-    userDescription = user.description
+    userName.textContent = `Username: ${user.username}`
+    userEmail.textContent = `Email: ${user.email}`
+    userDescription.textContent = `About You(optional): ${user.description}`
+
     editBtn.textContent = 'Edit Account'
     dBtn.textContent = 'Delete Account'
 
     userCard.innerHTML = ""
     userDivCard.innerHTML = ""
-
+    
     userDivCard.append(userMessage, userName, userEmail, userDescription, editBtn, dBtn)
     userCard.appendChild(userDivCard)
     
-    // editBtn.addEventListener('click', () => handleEditUser(user))
+    editBtn.addEventListener('click', () => handleEditUser())
     dBtn.addEventListener('click', () => deleteUser(user.id))
     })
 }
 
 function handleEditUser(user) {
     let userEditDiv = document.querySelector('.user-edit-div')
-
+    userEditDiv.style.visibility = "visible"
     let editTitle = document.createElement('h3')
     let userEdit = document.createElement('div')
     let editForm = document.createElement('form')
@@ -263,9 +279,46 @@ function handleEditUser(user) {
 
     editForm.append(nameInput, emailInput, descInput, saveBtn)
     userEdit.appendChild(editForm)
-    userEditDiv.append(editTitle, userEdit)
+    if(userEditDiv.children.length == 0) {
+        userEditDiv.append(editTitle, userEdit)
+    }
 
-    // saveBtn.addEventListener('submit', renderSpecies)
-    
-    patchUser(user)
+    editForm.addEventListener('submit', (e) => handleEditSubmit(e))
+}
+
+function handleEditSubmit(e) {
+    e.preventDefault()
+    const id = document.querySelector('.current-user').id
+    patchUser(id, e)
+}
+
+function userSpeciesDonation(e) {
+    e.preventDefault()
+    let userCard = document.querySelector('.main-account-card')
+    let formData = {
+        species_id: parseInt(e.target.parentElement.parentElement.id),
+        user_id: parseInt(userCard.id),
+        amount: parseFloat(e.target[0].value)
+    }
+
+    fetch(donationURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(data =>  {
+        //data[0].amount
+        //data[2].name
+        let userSpecies = document.querySelector('.user-species-donations')
+        let donationContainer = document.createElement('div')
+        let h3 = document.createElement('h3')
+
+        h3.textContent = `Donation to: ${data[2].name} Amount: ${data[0].amount}`
+
+        donationContainer.appendChild(h3)
+        userSpecies.appendChild(donationContainer)
+    })
 }
