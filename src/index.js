@@ -1,8 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     renderLoginPage()
+    renderTotalDonations()
     getSpecies()
     renderNavBar()
 })
+
+function renderTotalDonations() {
+    fetch(donationURL)
+    .then(res => res.json())
+    .then(donations => {
+        donations.forEach(donation => {
+            console.log(donation)
+            newDiv = donationDivBuilder()
+            newNewDiv = addDetailsToDonation(donation, newDiv)
+            let divContainer = document.querySelector('.user-species-donations')
+            divContainer.appendChild(newNewDiv)
+        })
+    })
+}
+
+function addDetailsToDonation(details, div) {
+    div.textContent = `Donation to: ${details.name}. Amount: ${details.total}`
+    return div
+}
+
+function donationDivBuilder() {
+    const div = document.createElement('div')
+    return div
+}
 
 const speciesURL = "http://localhost:3000/species"
 const usersURL = "http://localhost:3000/users"
@@ -32,10 +57,6 @@ function createNewUser(e) {
         document.querySelector('.current-user').id = user.id
         let hideUser = document.querySelector('#login-container').style.visibility = "hidden"
     })
-}
-
-function createNewDonation() {
-
 }
 
 function patchUser(id, e) {
@@ -310,13 +331,11 @@ function userSpeciesDonation(e) {
     })
     .then(res => res.json())
     .then(data =>  {
-        //data[0].amount
-        //data[2].name
         let userSpecies = document.querySelector('.user-species-donations')
         let donationContainer = document.createElement('div')
         let h3 = document.createElement('h3')
 
-        h3.textContent = `Donation to: ${data[2].name} Amount: ${data[0].amount}`
+        h3.textContent = `Donation to: ${data[2].name} Amount: $${data[0].amount}`
 
         donationContainer.appendChild(h3)
         userSpecies.appendChild(donationContainer)
