@@ -1,5 +1,6 @@
 body {
   background-color: #669999;
+  font: cursive;
 }
 
 #login-container form {
@@ -44,6 +45,7 @@ body {
   .main-container-img {
     width: 600px;
     height: 500px;
+    border-radius: 15px;
   }
 
   .navbar h3:hover {

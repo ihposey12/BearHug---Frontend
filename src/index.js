@@ -210,11 +210,11 @@ function handleClick(species) {
     mainDivContainer.className = 'main-container'
     speciesImgMain.className = 'main-container-img'
     speciesImgMain.src = species.image_url
-    mainH2.textContent = species.name
-    mainH3.textContent = species.latin_name
-    mainH4.textContent = species.status
-    habitats.textContent = species.habitats
-    population.textContent = species.population
+    mainH2.textContent = `${species.name}`
+    mainH3.textContent = `Scientific Name: ${species.latin_name}`
+    mainH4.textContent = `Conservation Status: ${species.status}`
+    habitats.textContent = `Habitat(s): ${species.habitats}`
+    population.textContent = `Population: ${species.population}`
     p.textContent = species.description
     donateBtn.textContent = 'Donate'
     btnInput.setAttribute('type', 'number')
